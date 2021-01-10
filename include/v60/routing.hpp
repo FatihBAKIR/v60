@@ -1,0 +1,95 @@
+#pragma once
+
+#include <algorithm>
+#include <ctre.hpp>
+#include <optional>
+#include <string_view>
+#include <v60/fixed_string.hpp>
+#include <v60/meta.hpp>
+#include <v60/request.hpp>
+#include <v60/response.hpp>
+
+namespace v60 {
+namespace detail {
+template<class RangeT>
+constexpr auto dist(RangeT& rng) {
+    int res = 0;
+    for (auto& _ : rng) {
+        ++res;
+    }
+    return res;
+}
+} // namespace detail
+
+template<fixed_string pattern>
+constexpr auto path_pattern_to_regex() {
+    constexpr auto pattern_sv = std::string_view(pattern);
+    constexpr auto sres = ctre::range<":(\\w+)">(pattern_sv);
+
+    constexpr int size = detail::dist(sres);
+
+    if constexpr (size == 0) {
+        return pattern;
+    }
+
+    fixed_string<pattern.size() + size * 7> res{};
+
+    auto res_it = res.begin();
+    auto beg = pattern_sv.begin();
+    int off = 0;
+    for (auto& m : sres) {
+        auto len = std::distance(beg, m.get<0>().begin());
+        res_it = std::copy_n(beg, len, res_it);
+        beg += len;
+
+        res_it = std::copy_n("(?<", 3, res_it);
+        res_it = std::copy(m.get<1>().begin(), m.get<1>().end(), res_it);
+        res_it = std::copy_n(">\\w+)", 5, res_it);
+
+        beg += std::distance(m.get<0>().begin(), m.get<0>().end());
+    }
+
+    return res;
+}
+
+template<class T>
+concept IsOptional = meta::is_instance<T, std::optional>::value;
+
+namespace detail {
+auto dummy_send = [](auto&&) -> task<void> {};
+}
+
+template<class ParamT, class BodyT, class T>
+concept RoutableOf = requires(T t) {
+    {
+        static_cast<const T&>(t).match(std::declval<http::verb>(),
+                                       std::declval<std::string_view>())
+    }
+    ->std::convertible_to<bool>;
+
+    {
+        static_cast<const T&>(t)(std::declval<request<ParamT, BodyT>&&>(),
+                                 std::declval<response<decltype(detail::dummy_send)>&&>())
+    }
+    ->meta::awaitable;
+};
+
+template<class T>
+concept Routable = RoutableOf<object<>, object<>, T>;
+
+class null_end_point {
+public:
+    bool match(http::verb, std::string_view) const {
+        return false;
+    }
+
+    template<Request R, Response Resp>
+    task<bool> operator()(R, Resp) const {
+        co_return false;
+    }
+};
+
+static_assert(Routable<null_end_point>);
+
+struct any_routable {};
+} // namespace v60
