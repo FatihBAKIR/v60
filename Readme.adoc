@@ -29,7 +29,7 @@ Hello from v60!
 
 _See link:examples/parameter.cpp[] for an example_
 
-The request URL can be pattern matched and accessed with a type safe
+The request URL can be pattern matched and accessed with a type safe and compile time checked interface.
 
 [source, cpp]
 ----
@@ -66,7 +66,7 @@ auto user_routes = group(name_route, age_route);
 auto user = bind<"/user/:userId">(user_routes);
 ----
 
-Like with regular URL parameters, bound parameters are also type safe. So if you
+Like with regular URL parameters, bound parameters are also checked. So if you
 try to access a non-existent parameter in a sub-route, it'll not compile.
 
 == Building
