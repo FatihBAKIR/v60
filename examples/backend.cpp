@@ -15,9 +15,9 @@ auto user_router() {
     };
 
     auto age_handler = [](Request auto req, Response auto resp) -> task<void> {
-      std::cerr << "In age handler\n";
+        std::cerr << "In age handler\n";
 
-      req.body.for_each_member([&]<auto k>(auto& val) {
+        req.body.for_each_member([&]<auto k>(auto& val) {
             std::cerr << std::string_view(k) << ": " << val << '\n';
         });
         req.params.for_each_member([&]<auto key>(auto& val) {

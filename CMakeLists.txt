@@ -30,7 +30,8 @@ add_library(v60
     include/v60/http.hpp
     include/v60/server.hpp
     src/server.cpp
-        include/v60/v60.hpp)
+    include/v60/v60.hpp
+)
 target_compile_features(v60 PUBLIC cxx_std_20)
 target_include_directories(v60 PUBLIC include)
 target_link_libraries(v60 PUBLIC Boost::boost Boost::system Boost::date_time)

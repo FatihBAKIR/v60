@@ -5,8 +5,7 @@ static_assert(fixed_string("foo").size() == 4);
 
 namespace {
 template<fixed_string str>
-class x {
-};
+class x {};
 
 x<"foo"> x_;
 } // namespace
