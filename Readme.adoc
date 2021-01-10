@@ -17,9 +17,13 @@ int main() {
     server serv(std::move(root));
     serv.listen(8080);
 }
-----
 
-Then browse to http://localhost:8080/hello
+/*
+# Build and run it
+curl http://localhost:8080/hello
+Hello from v60!
+*/
+----
 
 == URL Parameters
 
