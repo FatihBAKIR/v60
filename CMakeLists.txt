@@ -8,7 +8,29 @@ set(Boost_USE_STATIC_RUNTIME OFF)
 set(BOOST_ROOT "C:\\local\\boost_1_75_0")
 find_package(Boost REQUIRED COMPONENTS system date_time)
 
-add_executable(backend backend.cpp include/ctre.hpp include/coro_concepts.hpp include/v60/fixed_string.hpp include/v60/meta.hpp include/v60/object.hpp include/v60/request.hpp include/v60/ctre.hpp include/v60/routing.hpp src/routing.cpp src/meta.cpp include/v60/async.hpp include/v60/group.hpp include/v60/binding.hpp include/v60/end_point.hpp include/v60/middleware.hpp include/v60/response.hpp include/v60/http.hpp)
+add_executable(backend 
+    backend.cpp 
+    src/routing.cpp 
+    src/meta.cpp
+    src/object.cpp
+    src/async.cpp
+    src/fixed_string.cpp
+    include/ctre.hpp 
+    include/coro_concepts.hpp 
+    include/v60/fixed_string.hpp
+    include/v60/meta.hpp 
+    include/v60/object.hpp 
+    include/v60/request.hpp 
+    include/v60/ctre.hpp 
+    include/v60/routing.hpp 
+    include/v60/async.hpp 
+    include/v60/group.hpp 
+    include/v60/binding.hpp 
+    include/v60/end_point.hpp 
+    include/v60/middleware.hpp 
+    include/v60/response.hpp 
+    include/v60/http.hpp
+)
 target_compile_features(backend PUBLIC cxx_std_20)
 target_include_directories(backend PUBLIC include)
 target_link_libraries(backend PUBLIC Boost::boost Boost::system Boost::date_time)

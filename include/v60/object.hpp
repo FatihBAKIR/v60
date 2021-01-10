@@ -11,12 +11,12 @@ template<fixed_string key, class T>
 struct member {};
 
 struct member_less {
-    template<v60::fixed_string left_key,
+    template<fixed_string left_key,
              class leftT,
-             v60::fixed_string right_key,
+             fixed_string right_key,
              class rightT>
-    constexpr bool operator()(v60::meta::id<v60::member<left_key, leftT>>,
-                              v60::meta::id<v60::member<right_key, rightT>>) {
+    constexpr bool operator()(meta::id<member<left_key, leftT>>,
+                              meta::id<member<right_key, rightT>>) {
         return std::less<>{}(std::string_view(left_key), std::string_view(right_key));
     }
 };

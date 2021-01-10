@@ -37,4 +37,7 @@ struct fixed_string {
 
     friend auto operator<=>(const fixed_string&, const fixed_string&) = default;
 };
+
+template <size_t N>
+fixed_string(const char (&)[N]) -> fixed_string<N>;
 } // namespace v60
