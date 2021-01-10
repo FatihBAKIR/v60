@@ -15,10 +15,9 @@ add_executable(backend
     src/object.cpp
     src/async.cpp
     src/fixed_string.cpp
-    include/ctre.hpp 
-    include/coro_concepts.hpp 
+    include/ctre.hpp
     include/v60/fixed_string.hpp
-    include/v60/meta.hpp 
+    include/v60/meta.hpp
     include/v60/object.hpp 
     include/v60/request.hpp 
     include/v60/ctre.hpp 

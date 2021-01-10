@@ -1,0 +1,87 @@
+= v60
+
+**v60** is an experimental HTML server framework written in C++20.
+
+== Quick start
+
+[source, cpp]
+----
+#include <v60/v60.hpp>
+
+int main() {
+    using namespace v60;
+    auto root = get<"/hello">([](Request auto req, Response auto resp) -> task<void> {
+        co_await resp.send("Hello from v60!");
+    });
+
+    server serv(std::move(root));
+    serv.listen(8080);
+}
+----
+
+Then browse to http://localhost:8080
+
+== URL Parameters
+
+The request URL can be pattern matched and accessed with a type safe
+
+[source, cpp]
+----
+// OK, magic!
+get</"user/:userId/hello">([](Request auto req, Response auto resp) -> task<void> {
+    co_await resp.send("Hello there, " + std::string(req.params.get<"userId">()));
+});
+
+// Will fail to compile since there is no user_id parameter!
+get</"user/:userId/hello">([](Request auto req, Response auto resp) -> task<void> {
+    co_await resp.send("Hello there, " + std::string(req.params.get<"user_id">()));
+});
+----
+
+== Groups and bindings
+
+[source, cpp]
+----
+auto name_route = get<"/name">([](Request auto req, Response auto resp) -> task<void> {
+    co_await resp.send("Hello " + std::string(req.params.get<"userId">()) + ", your name is foo");
+});
+
+auto age_route = get<"/age">([](Request auto req, Response auto resp) -> task<void> {
+    co_await resp.send("Hello " + std::string(req.params.get<"userId">()) + ", your age is 42");
+});
+
+auto user_routes = group(name_route, age_route);
+
+auto user = bind<"/user/:userId">(user_routes);
+----
+
+Like with regular URL parameters, bound parameters are also type safe. So if you
+try to access a non-existent parameter in a sub-route, it'll not compile.
+
+== Building
+
+v60 uses a bunch of C++20 features and currently the only compiler I managed to build on
+without issues is MSVC 19.28.
+
+You'll need a very recent boost (I tested with 1.75).
+
+If you have a compiler with the necessary features:
+
+=== MSVC
+
+[source, sh]
+----
+mkdir build
+cd build
+cmake -G "Visual Studio 16 2019" -A x64 ..
+cmake --build . --target backend --config Debug
+----
+
+=== GCC/Clang
+[source, sh]
+----
+mkdir build
+cd build
+cmake -G Ninja ..
+ninja backend
+----
