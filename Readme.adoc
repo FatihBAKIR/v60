@@ -1,6 +1,6 @@
 = v60
 
-**v60** is an experimental HTML server framework written in C++20.
+**v60** is an experimental HTTP server framework written in C++20.
 
 == Quick start
 
