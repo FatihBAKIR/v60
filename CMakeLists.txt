@@ -30,6 +30,8 @@ add_executable(backend
     include/v60/middleware.hpp 
     include/v60/response.hpp 
     include/v60/http.hpp
+    include/v60/server.hpp
+    src/server.cpp
 )
 target_compile_features(backend PUBLIC cxx_std_20)
 target_include_directories(backend PUBLIC include)

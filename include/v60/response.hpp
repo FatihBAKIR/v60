@@ -42,7 +42,8 @@ public:
     }
 
     void set_header(std::string_view key, std::string_view value) {
-        m_resp.set(boost::string_view(key.data(), key.size()), boost::string_view(value.data(), value.size()));
+        m_resp.set(boost::string_view(key.data(), key.size()),
+                   boost::string_view(value.data(), value.size()));
     }
 
 private:
@@ -52,4 +53,7 @@ private:
 
 template<class T>
 concept Response = meta::is_instance<T, response>::value;
+
+using any_send = std::function<task<void>(http::str_response)>;
+using any_response = response<any_send>;
 } // namespace v60
