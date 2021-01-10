@@ -19,9 +19,11 @@ int main() {
 }
 ----
 
-Then browse to http://localhost:8080
+Then browse to http://localhost:8080/hello
 
 == URL Parameters
+
+_See link:examples/parameter.cpp[] for an example_
 
 The request URL can be pattern matched and accessed with a type safe
 
@@ -38,7 +40,12 @@ get</"user/:userId/hello">([](Request auto req, Response auto resp) -> task<void
 });
 ----
 
+The parameters are matched with regular expressions compiled at compile time with the
+amazing link:https://github.com/hanickadot/compile-time-regular-expressions[CTRE] library.
+
 == Groups and bindings
+
+_See link:examples/backend.cpp[] for an example_
 
 [source, cpp]
 ----

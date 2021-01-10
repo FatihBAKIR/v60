@@ -75,7 +75,9 @@ public:
 };
 
 template<class T>
-concept Request = meta::is_instance<T, request>::value;
+concept Request = meta::is_instance<T, request>::value&& requires(T t) {
+    {t.params};
+};
 
 template<class Body, class T>
 concept RequestWith = Request<T>&& std::is_same_v<typename T::body_type, Body>;

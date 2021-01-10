@@ -91,5 +91,49 @@ public:
 
 static_assert(Routable<null_end_point>);
 
-struct any_routable {};
+namespace detail {
+template<Request Req, Response Resp>
+struct virt_routable {
+    virtual bool match(http::verb, std::string_view) const = 0;
+    virtual task<bool> operator()(Req req, Resp resp) const = 0;
+    virtual ~virt_routable() = default;
+};
+
+template<Routable Rt, Request Req, Response Resp>
+struct erased_routable : virt_routable<Req, Resp> {
+    erased_routable(Rt rt)
+        : m_rt{std::move(rt)} {
+    }
+
+    bool match(http::verb verb, std::string_view view) const override {
+        return m_rt.match(verb, view);
+    }
+
+    task<bool> operator()(Req req, Resp resp) const override {
+        return m_rt(std::move(req), std::move(resp));
+    }
+
+    Rt m_rt;
+};
+} // namespace detail
+
+template<Request Req, Response Resp>
+struct any_routable {
+    template<Routable Rt>
+    any_routable(Rt&& rt)
+        : m_rt{std::make_unique<detail::erased_routable<Rt, Req, Resp>>(
+              std::forward<Rt>(rt))} {
+    }
+
+    bool match(http::verb verb, std::string_view view) const {
+        return m_rt->match(verb, view);
+    }
+
+    task<bool> operator()(Req req, Resp resp) const {
+        return (*m_rt)(std::move(req), std::move(resp));
+    }
+
+private:
+    std::unique_ptr<detail::virt_routable<Req, Resp>> m_rt;
+};
 } // namespace v60

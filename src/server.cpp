@@ -21,8 +21,12 @@ void fail(beast::error_code ec, char const* what) {
 } // namespace
 
 struct server_impl {
-    std::function<task<bool>(request<object<>, std::string_view>, any_response)> m_route;
+    any_routable<request<object<>, std::string_view>, any_response> m_route;
     net::io_context m_ioc{4};
+
+    server_impl(any_routable<request<object<>, std::string_view>, any_response> route)
+        : m_route{std::move(route)} {
+    }
 
     template<class Body, class Allocator, class Send>
     v60::task<void>
@@ -59,7 +63,8 @@ struct server_impl {
         res.keep_alive(req.keep_alive());
 
         v60::any_response resp(send, std::move(res));
-        const auto route_res = co_await m_route(std::move(reqq), std::move(resp));
+        const auto route_res = m_route.match(verb, target) &&
+                               co_await m_route(std::move(reqq), std::move(resp));
 
         if (route_res) {
             std::cerr << "200 [" << to_string(verb) << "] \"" << target << "\"\n";
@@ -163,10 +168,8 @@ struct server_impl {
     }
 };
 
-server::server(std::function<task<bool>(request<object<>, std::string_view>,
-                                        any_response)> root_route)
-    : m_impl(std::make_unique<server_impl>()) {
-    m_impl->m_route = std::move(root_route);
+server::server(any_routable<request<object<>, std::string_view>, any_response> root_route)
+    : m_impl(std::make_unique<server_impl>(std::move(root_route))) {
 }
 
 void server::listen(int p_port) {

@@ -1,33 +1,29 @@
 #include <iostream>
-#include <v60/end_point.hpp>
-#include <v60/group.hpp>
-#include <v60/middleware.hpp>
-#include <v60/server.hpp>
+#include <v60/v60.hpp>
 
 auto user_router() {
     using namespace v60;
 
     auto name_handler = [](Request auto req, Response auto resp) -> task<void> {
-        std::cerr << "In correct handler\n";
+        std::cerr << "In name handler\n";
 
         req.params.for_each_member([&]<auto key>(auto& val) {
             std::cerr << std::string_view(key) << ": " << val << '\n';
         });
 
-        std::cerr << &resp << '\n';
         co_await resp.send("hello");
     };
 
     auto age_handler = [](Request auto req, Response auto resp) -> task<void> {
-        co_await resp.send("age: 1234");
+      std::cerr << "In age handler\n";
 
-        //        std::cerr << req.body << '\n';
-        req.body.for_each_member([&]<auto k>(auto& val) {
+      req.body.for_each_member([&]<auto k>(auto& val) {
             std::cerr << std::string_view(k) << ": " << val << '\n';
         });
         req.params.for_each_member([&]<auto key>(auto& val) {
             std::cerr << std::string_view(key) << ": " << val << '\n';
         });
+        co_await resp.send("Age handler");
     };
 
     return group(get<"/name">(name_handler),
