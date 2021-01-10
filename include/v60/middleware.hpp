@@ -4,12 +4,6 @@
 #include <v60/routing.hpp>
 
 namespace v60 {
-template<class R, class N, class T>
-concept Middleware = requires(T t) {
-    { static_cast<const T&>(t)(std::declval<R&>(), std::declval<N&>()) }
-    ->meta::awaitable;
-};
-
 template<Routable NextT, class FnT>
 struct middleware {
     NextT m_next;
@@ -39,10 +33,6 @@ auto use(FnT&& m, N&& next) {
 
 auto json_body = []<Object Params, std::convertible_to<std::string_view> Body>(
                      request<Params, Body> req, Response auto resp, Routable auto& next) {
-    if (req.method() != http::verb::post) {
-        return next(std::forward<decltype(req)>(req), std::forward<decltype(resp)>(resp));
-    }
-
     return next(
         std::forward<decltype(req)>(req).with_body(nlohmann::json::parse(req.body)),
         std::move(resp));
