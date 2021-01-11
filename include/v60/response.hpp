@@ -23,15 +23,12 @@ public:
     task<void> json(const ResObj& obj);
 
     task<void> json(const nlohmann::json& data) {
-        m_resp.body() = std::string(data);
-        m_resp.content_length(m_resp.body().size());
         set_content_type("application/json");
-
-        co_await m_send(std::move(m_resp));
+        return send(data.dump());
     }
 
-    task<void> send(std::string_view data) {
-        m_resp.body() = std::string(data);
+    task<void> send(std::string data) {
+        m_resp.body() = std::move(data);
         m_resp.content_length(m_resp.body().size());
 
         co_await m_send(std::move(m_resp));

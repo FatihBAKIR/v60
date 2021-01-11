@@ -53,6 +53,20 @@ auto object_body =
     };
 
 
+auto profile_mw = [](v60::Request auto req,
+                     v60::Response auto resp,
+                     v60::Routable auto& next) -> v60::task<bool> {
+    auto begin = std::chrono::high_resolution_clock::now();
+    auto res = co_await next(std::move(req), std::move(resp));
+    auto end = std::chrono::high_resolution_clock::now();
+    std::cerr
+        << "["
+        << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()
+        << "us]\n";
+
+    co_return res;
+};
+
 auto not_found_mw = [](v60::Request auto req,
                        v60::Response auto resp,
                        v60::Routable auto& next) -> v60::task<bool> {

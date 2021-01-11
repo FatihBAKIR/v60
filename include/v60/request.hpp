@@ -1,5 +1,6 @@
 #pragma once
 
+#include <optional>
 #include <string_view>
 #include <v60/http.hpp>
 #include <v60/meta.hpp>
@@ -33,13 +34,24 @@ public:
         return m_raw.method();
     }
 
+    std::optional<std::string_view> header(std::string_view key) const {
+        auto it = m_raw.find(boost::string_view(key.data(), key.size()));
+        if (it == m_raw.end()) {
+            return {};
+        }
+        auto val = it->value();
+        return std::string_view(val.data(), val.size());
+    }
+
 private:
     std::string_view m_remaining;
     http::str_request m_raw;
 };
 
-template<Object Params = object<>, class Body = object<>>
-class request : public base_request {
+template<Object Params = object<>, class Body = object<>, class... Mixins>
+class request
+    : public base_request
+    , public Mixins... {
 public:
     using body_type = Body;
 
@@ -47,30 +59,37 @@ public:
     Body body;
 
     template<Object NewParams>
-    request<NewParams, Body> with_params(NewParams&& new_params) & {
-        return request<NewParams, Body>{{static_cast<base_request&>(*this)},
-                                        std::forward<NewParams>(new_params),
-                                        body};
+    request<NewParams, Body, Mixins...> with_params(NewParams&& new_params) & {
+        return request<NewParams, Body, Mixins...>{{static_cast<base_request&>(*this)},
+                                                   {static_cast<Mixins&>(*this)}...,
+                                                   std::forward<NewParams>(new_params),
+                                                   body};
     }
 
     template<Object NewParams>
-    request<NewParams, Body> with_params(NewParams&& new_params) && {
-        return request<NewParams, Body>{{std::move(static_cast<base_request&>(*this))},
-                                        std::forward<NewParams>(new_params),
-                                        std::move(body)};
+    request<NewParams, Body, Mixins...> with_params(NewParams&& new_params) && {
+        return request<NewParams, Body, Mixins...>{
+            {std::move(static_cast<base_request&>(*this))},
+            {std::move(static_cast<Mixins&>(*this))}...,
+            std::forward<NewParams>(new_params),
+            std::move(body)};
     }
 
     template<class NewBody>
-    request<Params, NewBody> with_body(NewBody&& new_body) & {
-        return request<Params, NewBody>{
-            {static_cast<base_request&>(*this)}, params, std::forward<NewBody>(new_body)};
+    request<Params, NewBody, Mixins...> with_body(NewBody&& new_body) & {
+        return request<Params, NewBody, Mixins...>{{static_cast<base_request&>(*this)},
+                                                   {static_cast<Mixins&>(*this)}...,
+                                                   params,
+                                                   std::forward<NewBody>(new_body)};
     }
 
     template<class NewBody>
-    request<Params, NewBody> with_body(NewBody&& new_body) && {
-        return request<Params, NewBody>{{std::move(static_cast<base_request&>(*this))},
-                                        std::move(params),
-                                        std::forward<NewBody>(new_body)};
+    request<Params, NewBody, Mixins...> with_body(NewBody&& new_body) && {
+        return request<Params, NewBody, Mixins...>{
+            {std::move(static_cast<base_request&>(*this))},
+            {std::move(static_cast<Mixins&>(*this))}...,
+            std::move(params),
+            std::forward<NewBody>(new_body)};
     }
 };
 
