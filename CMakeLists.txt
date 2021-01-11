@@ -37,6 +37,9 @@ target_include_directories(v60 PUBLIC include)
 target_link_libraries(v60 PUBLIC Boost::boost Boost::system Boost::date_time)
 target_link_directories(v60 PUBLIC ${Boost_LIBRARY_DIRS})
 
+find_package(Threads REQUIRED)
+target_link_libraries(v60 PUBLIC Threads::Threads)
+
 if (WIN32)
     target_compile_definitions(v60 PUBLIC _WIN32_WINNT=0x0601)
 endif()

@@ -6,6 +6,7 @@
 #include <boost/beast/core/tcp_stream.hpp>
 #include <boost/beast/http.hpp>
 #include <iostream>
+#include <thread>
 #include <v60/server.hpp>
 
 namespace v60 {
