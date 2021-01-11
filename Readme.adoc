@@ -71,8 +71,15 @@ try to access a non-existent parameter in a sub-route, it'll not compile.
 
 == Building
 
-v60 uses a bunch of C++20 features and currently the only compiler I managed to build on
-without issues is MSVC 19.28.
+v60 uses a bunch of C++20 features requires quite recent compiler.
+
+The toolchains I've tested with are:
+
+. MSVC 19.28
+. Clang 12 + libcxx (trunk)
+
+GCC-10 failed to build it, but I did not test trunk, though I'd expect it
+to work.
 
 You'll need a very recent boost (I tested with 1.75).
 
