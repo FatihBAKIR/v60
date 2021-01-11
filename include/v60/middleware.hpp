@@ -32,31 +32,27 @@ auto use(FnT&& m, N&& next) {
     return middleware<N, FnT>{std::forward<N>(next), std::forward<FnT>(m)};
 }
 
-auto json_body = []<Object Params, meta::convertible_to<std::string_view> Body>(
-                     request<Params, Body> req, Response auto resp, Routable auto& next) {
+auto json_body = [](Request auto req, Response auto resp, Routable auto& next) {
     return next(
         std::forward<decltype(req)>(req).with_body(nlohmann::json::parse(req.body)),
         std::move(resp));
 };
 
 template<Object ObjT>
-auto object_body =
-    []<Object Params, meta::convertible_to<std::string_view> Body>(
-        request<Params, Body> req, Response auto resp, Routable auto& next) {
-        auto json = nlohmann::json::parse(req.body);
+auto object_body = [](Request auto req, Response auto resp, Routable auto& next) {
+    auto json = nlohmann::json::parse(req.body);
 
-        ObjT body;
-        body.for_each_member([&]<auto key>(auto& mem) {
-            mem = json[std::string(std::string_view(key))];
-        });
+    ObjT body;
+    body.for_each_member([&]<auto key>(auto& mem) {
+        mem = json[std::string(std::string_view(key))];
+    });
 
-        return next(std::move(req).with_body(std::move(body)), std::move(resp));
-    };
+    return next(std::move(req).with_body(std::move(body)), std::move(resp));
+};
 
 
-auto profile_mw = [](v60::Request auto req,
-                     v60::Response auto resp,
-                     v60::Routable auto& next) -> v60::task<bool> {
+auto profile_mw =
+    [](Request auto req, Response auto resp, Routable auto& next) -> task<bool> {
     auto begin = std::chrono::high_resolution_clock::now();
     auto res = co_await next(std::move(req), std::move(resp));
     auto end = std::chrono::high_resolution_clock::now();
@@ -68,9 +64,8 @@ auto profile_mw = [](v60::Request auto req,
     co_return res;
 };
 
-auto not_found_mw = [](v60::Request auto req,
-                       v60::Response auto resp,
-                       v60::Routable auto& next) -> v60::task<bool> {
+auto not_found_mw =
+    [](Request auto req, Response auto resp, Routable auto& next) -> task<bool> {
     const auto is_matched = next.match(req.method(), req.path());
     if (!is_matched) {
         std::cerr << "404 [" << to_string(req.method()) << "] \"" << req.path() << "\"\n";
@@ -82,9 +77,8 @@ auto not_found_mw = [](v60::Request auto req,
     co_return co_await next(std::move(req), std::move(resp));
 };
 
-auto server_fault_mw = [](v60::Request auto req,
-                          v60::Response auto resp,
-                          v60::Routable auto& next) -> v60::task<bool> {
+auto server_fault_mw =
+    [](Request auto req, Response auto resp, Routable auto& next) -> task<bool> {
     auto method = req.method();
     auto path = req.path();
     auto resp_bak = resp;

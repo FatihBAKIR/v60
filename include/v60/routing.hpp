@@ -19,7 +19,6 @@ constexpr auto dist(RangeT& rng) {
     }
     return res;
 }
-} // namespace detail
 
 template<fixed_string pattern>
 constexpr auto path_pattern_to_regex() {
@@ -52,28 +51,28 @@ constexpr auto path_pattern_to_regex() {
     return res;
 }
 
-template<class T>
-concept IsOptional = meta::is_instance<T, std::optional>::value;
-
-namespace detail {
 auto dummy_send = [](auto&&) -> task<void> {};
-}
+} // namespace detail
 
 template<class ParamT, class BodyT, class T>
 concept RoutableOf = requires(T t) {
-    {static_cast<const T&>(t).match(std::declval<http::verb>(),
-                                    std::declval<std::string_view>())};
-    //->std::convertible_to<bool>;
+    {
+        static_cast<const T&>(t).match(std::declval<http::verb>(),
+                                       std::declval<std::string_view>())
+    }
+    ->meta::convertible_to<bool>;
 
     {
         static_cast<const T&>(t)(std::declval<request<ParamT, BodyT>&&>(),
                                  std::declval<response<decltype(detail::dummy_send)>&&>())
-        } -> meta::awaitable;
+    }
+    ->meta::awaitable;
 };
 
 template<class T>
 concept Routable = RoutableOf<object<>, object<>, T>;
 
+namespace detail {
 class null_end_point {
 public:
     bool match(http::verb, std::string_view) const {
@@ -88,7 +87,6 @@ public:
 
 static_assert(Routable<null_end_point>);
 
-namespace detail {
 template<Request Req, Response Resp>
 struct virt_routable {
     virtual bool match(http::verb, std::string_view) const = 0;

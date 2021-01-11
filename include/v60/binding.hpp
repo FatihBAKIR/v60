@@ -16,7 +16,7 @@ public:
     NextT m_next;
 
     static constexpr auto re() {
-        return ctre::re<::meta::to_ct_str(path_pattern_to_regex<Path>())>();
+        return ctre::re<::meta::to_ct_str(detail::path_pattern_to_regex<Path>())>();
     }
 
     using RE = decltype(re());
@@ -37,8 +37,8 @@ public:
         return m_next.match(v, remain);
     }
 
-    template<Object ExistingParams, class Body, Response Resp>
-    task<bool> operator()(request<ExistingParams, Body> req, Resp resp) const {
+    template<Request Req, Response Resp>
+    task<bool> operator()(Req req, Resp resp) const {
         auto m = RE::starts_with(req.remaining());
 
         assert(m);
@@ -47,7 +47,7 @@ public:
         auto len = std::distance(req.remaining().begin(), all_match.end());
         assert(m_next.match(req.method(), req.remaining().substr(len)));
 
-        using CombinedParams = object_and<ExistingParams, ParamsObjectT>;
+        using CombinedParams = object_and<typename Req::params_type, ParamsObjectT>;
 
         CombinedParams params = std::move(req.params);
         ParamsObjectT::for_each_key([&]<auto key>() {
@@ -57,8 +57,7 @@ public:
 
         req.consume(static_cast<int>(len));
 
-        co_return co_await m_next(std::move(req).with_params(std::move(params)),
-                                  std::move(resp));
+        return m_next(std::move(req).with_params(std::move(params)), std::move(resp));
     }
 };
 
