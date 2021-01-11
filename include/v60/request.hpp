@@ -96,7 +96,7 @@ public:
 
 template<class T>
 concept Request = meta::is_instance<T, request>::value&& requires(T t) {
-    {T::params_type};
+    typename T::params_type;
     {t.params};
 };
 
