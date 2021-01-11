@@ -35,12 +35,12 @@ The request URL can be pattern matched and accessed with a type safe and compile
 ----
 // OK, magic!
 get</"user/:userId/hello">([](Request auto req, Response auto resp) -> task<void> {
-    co_await resp.send("Hello there, " + std::string(req.params.get<"userId">()));
+    co_await resp.send("Hello there, " + std::string(get<"userId">(req.params)));
 });
 
 // Will fail to compile since there is no user_id parameter!
 get</"user/:userId/hello">([](Request auto req, Response auto resp) -> task<void> {
-    co_await resp.send("Hello there, " + std::string(req.params.get<"user_id">()));
+    co_await resp.send("Hello there, " + std::string(get<"user_id">(req.params)));
 });
 ----
 
@@ -54,11 +54,11 @@ _See link:examples/backend.cpp[] for an example_
 [source, cpp]
 ----
 auto name_route = get<"/name">([](Request auto req, Response auto resp) -> task<void> {
-    co_await resp.send("Hello " + std::string(req.params.get<"userId">()) + ", your name is foo");
+    co_await resp.send("Hello " + std::string(get<"userId">(req.params)) + ", your name is foo");
 });
 
 auto age_route = get<"/age">([](Request auto req, Response auto resp) -> task<void> {
-    co_await resp.send("Hello " + std::string(req.params.get<"userId">()) + ", your age is 42");
+    co_await resp.send("Hello " + std::string(get<"userId">(req.params)) + ", your age is 42");
 });
 
 auto user_routes = group(name_route, age_route);
