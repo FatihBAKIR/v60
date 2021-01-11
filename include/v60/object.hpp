@@ -1,7 +1,6 @@
 #pragma once
 
 #include <iostream>
-#include <json.hpp>
 #include <tuple>
 #include <v60/fixed_string.hpp>
 #include <v60/meta.hpp>
@@ -54,9 +53,9 @@ struct object_impl<member<keys, Ts>...> {
         using extra_keys = meta::difference_t<all_keys, member_list, member_less>;
         using extra_obj_t = meta::instantiate_t<object, extra_keys>;
         extra_obj_t::for_each_key([&]<auto key>() {
-            m_dynamic.emplace(std::string_view(key), rhs.template get<key>());
-            std::cerr << "Key " << std::string_view(key)
-                      << " does not belong to new object\n";
+//            m_dynamic.emplace(std::string_view(key), rhs.template get<key>());
+//            std::cerr << "Key " << std::string_view(key)
+//                      << " does not belong to new object\n";
         });
     }
 
@@ -90,7 +89,6 @@ struct object_impl<member<keys, Ts>...> {
     }
 
 private:
-    nlohmann::json m_dynamic;
     std::tuple<Ts...> m_members;
 };
 
@@ -111,12 +109,8 @@ struct object_and_impl<object_impl<member<left_keys, left_Ts>...>,
 template<class T>
 concept Object = meta::is_instance<T, object_impl>::value;
 
-static_assert(Object<object<>>);
-static_assert(Object<object<member<"", int>>>);
-
 template<Object T, Object T2>
 using object_and = typename detail::object_and_impl<T, T2>::type;
-
 
 template<fixed_string Key, Object Obj>
 decltype(auto) get(Obj& obj) {

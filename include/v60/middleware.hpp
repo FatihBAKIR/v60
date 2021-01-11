@@ -1,5 +1,6 @@
 #pragma once
 
+#include <simdjson.h>
 #include <v60/meta.hpp>
 #include <v60/request.hpp>
 #include <v60/routing.hpp>
@@ -32,19 +33,16 @@ auto use(FnT&& m, N&& next) {
     return middleware<N, FnT>{std::forward<N>(next), std::forward<FnT>(m)};
 }
 
-auto json_body = [](Request auto req, Response auto resp, Routable auto& next) {
-    return next(
-        std::forward<decltype(req)>(req).with_body(nlohmann::json::parse(req.body)),
-        std::move(resp));
-};
-
 template<Object ObjT>
 auto object_body = [](Request auto req, Response auto resp, Routable auto& next) {
-    auto json = nlohmann::json::parse(req.body);
+    using namespace simdjson;
+    using namespace simdjson::builtin; // for ondemand
+    ondemand::parser parser;
+    ondemand::document elems = parser.iterate(req.body);
 
     ObjT body;
     body.for_each_member([&]<auto key>(auto& mem) {
-        mem = json[std::string(std::string_view(key))];
+        mem = elems[std::string_view(key)]; //.get<decltype(mem)>();
     });
 
     return next(std::move(req).with_body(std::move(body)), std::move(resp));

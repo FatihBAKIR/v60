@@ -33,10 +33,11 @@ add_library(v60
     include/v60/server.hpp
     src/server.cpp
     include/v60/v60.hpp
+    src/end_point.cpp
 )
 target_compile_features(v60 PUBLIC cxx_std_20)
 target_include_directories(v60 PUBLIC include)
-target_link_libraries(v60 PUBLIC Boost::boost Boost::system Boost::date_time)
+target_link_libraries(v60 PUBLIC Boost::boost Boost::system Boost::date_time simdjson)
 target_link_directories(v60 PUBLIC ${Boost_LIBRARY_DIRS})
 
 find_package(Threads REQUIRED)
@@ -51,3 +52,4 @@ else()
 endif()
 
 add_subdirectory(examples)
+add_subdirectory(third_party)

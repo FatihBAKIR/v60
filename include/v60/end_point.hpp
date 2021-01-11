@@ -44,10 +44,4 @@ template<fixed_string Path, class FnT>
 auto post(FnT&& fn) {
     return bind<Path, end_point<http::verb::post, FnT>>({std::forward<FnT>(fn)});
 }
-
-inline auto sample() {
-    return get<"/foo">([](const Request auto&, const Response auto&) {});
-}
-
-static_assert(Routable<decltype(sample())>);
 } // namespace v60

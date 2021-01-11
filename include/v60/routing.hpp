@@ -73,20 +73,6 @@ template<class T>
 concept Routable = RoutableOf<object<>, object<>, T>;
 
 namespace detail {
-class null_end_point {
-public:
-    bool match(http::verb, std::string_view) const {
-        return false;
-    }
-
-    template<Request R, Response Resp>
-    task<bool> operator()(R, Resp) const {
-        co_return false;
-    }
-};
-
-static_assert(Routable<null_end_point>);
-
 template<Request Req, Response Resp>
 struct virt_routable {
     virtual bool match(http::verb, std::string_view) const = 0;

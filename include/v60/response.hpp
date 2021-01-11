@@ -4,6 +4,7 @@
 #include <v60/async.hpp>
 #include <v60/http.hpp>
 #include <v60/object.hpp>
+#include <simdjson.h>
 
 namespace v60 {
 template<class SenderT>
@@ -22,16 +23,16 @@ public:
     template<Object ResObj>
     task<void> json(const ResObj& obj);
 
-    task<void> json(const nlohmann::json& data) {
+    task<void> json(int64_t data) {
         set_content_type("application/json");
-        return send(data.dump());
+        return send(std::to_string(data));
     }
 
     task<void> send(std::string data) {
         m_resp.body() = std::move(data);
         m_resp.content_length(m_resp.body().size());
 
-        co_await m_send(std::move(m_resp));
+        return m_send(std::move(m_resp));
     }
 
     void set_content_type(std::string_view type) {

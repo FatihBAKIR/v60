@@ -13,7 +13,7 @@ auto user_router() {
     };
 
     return group(get<"/name">(name_handler),
-                 use(object_body<object<member<"age", int>>>, post<"/age">(age_handler)));
+                 use(object_body<object<member<"age", int64_t>>>, post<"/age">(age_handler)));
 }
 
 auto app() {
