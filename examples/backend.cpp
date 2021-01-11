@@ -5,25 +5,11 @@ auto user_router() {
     using namespace v60;
 
     auto name_handler = [](Request auto req, Response auto resp) -> task<void> {
-        std::cerr << "In name handler\n";
-
-        req.params.for_each_member([&]<auto key>(auto& val) {
-            std::cerr << std::string_view(key) << ": " << val << '\n';
-        });
-
-        co_await resp.send("hello");
+        co_await resp.send("hello " + std::string(req.params.get<"userId">()));
     };
 
     auto age_handler = [](Request auto req, Response auto resp) -> task<void> {
-        std::cerr << "In age handler\n";
-
-        req.body.for_each_member([&]<auto k>(auto& val) {
-            std::cerr << std::string_view(k) << ": " << val << '\n';
-        });
-        req.params.for_each_member([&]<auto key>(auto& val) {
-            std::cerr << std::string_view(key) << ": " << val << '\n';
-        });
-        co_await resp.send("Age handler");
+        co_await resp.json(42);
     };
 
     return group(get<"/name">(name_handler),
@@ -37,6 +23,6 @@ auto app() {
 
 int main() {
     using namespace v60;
-    v60::server s(use(server_fault_mw, use(not_found_mw, app())));
+    v60::server s(use(profile_mw, use(server_fault_mw, use(not_found_mw, app()))));
     s.listen(8080);
 }
