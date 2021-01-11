@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.13)
 
 project(v60 CXX)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
@@ -42,6 +44,10 @@ target_link_libraries(v60 PUBLIC Threads::Threads)
 
 if (WIN32)
     target_compile_definitions(v60 PUBLIC _WIN32_WINNT=0x0601)
+else()
+    target_compile_options(backend PUBLIC -stdlib=libc++)
+    target_link_options(backend PUBLIC -stdlib=libc++)
+    target_link_options(backend PUBLIC -fuse-ld=lld)
 endif()
 
 add_subdirectory(examples)
