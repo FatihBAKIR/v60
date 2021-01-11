@@ -128,7 +128,7 @@ auto cookie_parser =
 
     std::map<std::string_view, std::string_view> kv;
     for (auto part : parts) {
-        if (auto [whole, key, val] = ctre::match<"(?<Key>\\S+)=(?<Value>\\S+)">(part);
+        if (auto [whole, key, val] = ctre::match<"(\\S+)=(\\S+)">(part);
             whole) {
             kv.emplace(std::string_view(key), std::string_view(val));
         }
