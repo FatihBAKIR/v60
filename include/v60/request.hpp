@@ -92,6 +92,17 @@ public:
             std::move(params),
             std::forward<NewBody>(new_body)};
     }
+
+    template <class Mixin>
+    request<Params, Body, Mixins..., Mixin> with_mixin(Mixin&& new_mixin) && {
+        return request<Params, Body, Mixins..., Mixin>{
+            {std::move(static_cast<base_request&>(*this))},
+            {std::move(static_cast<Mixins&>(*this))}...,
+            {std::forward<Mixin>(new_mixin)},
+            std::move(params),
+            std::move(body)};
+
+    }
 };
 
 template<class T>

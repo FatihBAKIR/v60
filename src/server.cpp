@@ -23,7 +23,7 @@ void fail(beast::error_code ec, char const* what) {
 
 struct server_impl {
     any_routable<request<object<>, std::string_view>, any_response> m_route;
-    net::io_context m_ioc{4};
+    net::io_context m_ioc{std::thread::hardware_concurrency()};
 
     server_impl(any_routable<request<object<>, std::string_view>, any_response> route)
         : m_route{std::move(route)} {
@@ -64,8 +64,7 @@ struct server_impl {
         res.keep_alive(req.keep_alive());
 
         v60::any_response resp(send, std::move(res));
-        const auto route_res = m_route.match(verb, target) &&
-                               co_await m_route(std::move(reqq), std::move(resp));
+        const auto route_res = co_await m_route(std::move(reqq), std::move(resp));
 
         if (route_res) {
             std::cerr << "200 [" << to_string(verb) << "] \"" << target << "\"\n";
@@ -91,7 +90,6 @@ struct server_impl {
         beast::flat_buffer buffer;
 
         try {
-
             for (;;) {
                 beast::http::request<beast::http::string_body> req;
 
@@ -152,7 +150,7 @@ struct server_impl {
     void listen(int p_port) {
         auto const address = net::ip::make_address("0.0.0.0");
         auto const port = static_cast<unsigned short>(p_port);
-        auto const threads = std::max<int>(1, 4);
+        auto const threads = std::max<int>(1, std::thread::hardware_concurrency());
 
         boost::asio::co_spawn(
             m_ioc, do_listen(m_ioc, tcp::endpoint{address, port}), boost::asio::detached);

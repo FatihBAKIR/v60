@@ -1,10 +1,10 @@
 #pragma once
 
+#include <simdjson.h>
 #include <string_view>
 #include <v60/async.hpp>
 #include <v60/http.hpp>
 #include <v60/object.hpp>
-#include <simdjson.h>
 
 namespace v60 {
 template<class SenderT>
@@ -14,6 +14,7 @@ public:
         : m_send{std::move(sender)}
         , m_resp{std::move(resp)} {
         m_resp.result(200);
+        content_type("text/html");
     }
 
     void status(int code) {
@@ -24,7 +25,7 @@ public:
     task<void> json(const ResObj& obj);
 
     task<void> json(int64_t data) {
-        set_content_type("application/json");
+        content_type("application/json");
         return send(std::to_string(data));
     }
 
@@ -35,11 +36,11 @@ public:
         return m_send(std::move(m_resp));
     }
 
-    void set_content_type(std::string_view type) {
-        set_header("content-type", type);
+    void content_type(std::string_view type) {
+        header("content-type", type);
     }
 
-    void set_header(std::string_view key, std::string_view value) {
+    void header(std::string_view key, std::string_view value) {
         m_resp.set(boost::string_view(key.data(), key.size()),
                    boost::string_view(value.data(), value.size()));
     }

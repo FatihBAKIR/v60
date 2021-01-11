@@ -12,3 +12,6 @@ target_link_libraries(code404 PUBLIC v60)
 
 add_executable(code500 500.cpp)
 target_link_libraries(code500 PUBLIC v60)
+
+add_executable(cookies cookies.cpp)
+target_link_libraries(cookies PUBLIC v60)

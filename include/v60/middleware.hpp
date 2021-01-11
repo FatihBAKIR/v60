@@ -90,4 +90,55 @@ auto server_fault_mw =
     co_await resp_bak.send("Internal server error!");
     co_return false;
 };
+
+inline std::vector<std::string_view> split(std::string_view str,
+                                           std::string_view delims = " ") {
+    std::vector<std::string_view> output;
+    output.reserve(str.size() / 2);
+
+    for (auto first = str.data(), second = str.data(), last = first + str.size();
+         second != last && first != last;
+         first = second + 1) {
+        second = std::find_first_of(first, last, std::cbegin(delims), std::cend(delims));
+
+        if (first != second)
+            output.emplace_back(first, second - first);
+    }
+
+    return output;
+}
+
+template<Object Cookies>
+struct cookie_mixin {
+    Cookies cookies;
+};
+
+template<Object Cookies>
+auto cookie_parser =
+    [](Request auto req, Response auto resp, Routable auto& next) -> task<bool> {
+
+    auto cookies_header = req.header("Cookie");
+    if (!cookies_header) {
+        co_return false;
+    }
+
+    std::cerr << "Received cookies: " << *cookies_header << '\n';
+
+    auto parts = split(*cookies_header, "; ");
+
+    std::map<std::string_view, std::string_view> kv;
+    for (auto part : parts) {
+        if (auto [whole, key, val] = ctre::match<"(?<Key>\\S+)=(?<Value>\\S+)">(part);
+            whole) {
+            kv.emplace(std::string_view(key), std::string_view(val));
+        }
+    }
+
+    cookie_mixin<Cookies> mixin;
+    mixin.cookies.for_each_member([&]<auto key>(auto& mem) {
+        mem = kv[std::string_view(key)];
+    });
+
+    co_return co_await next(std::move(req).with_mixin(std::move(mixin)), std::move(resp));
+};
 } // namespace v60
