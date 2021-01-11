@@ -3,8 +3,9 @@
 int main() {
     using namespace v60;
 
-    server s(get<"/hello">([](Request auto req, Response auto resp) -> task<void> {
-        co_await resp.send("Hello from v60!");
-    }));
+    server s(use(profile_mw,
+                 get<"/hello">([](Request auto req, Response auto resp) -> task<void> {
+                     co_await resp.send("Hello from v60!");
+                 })));
     s.listen(8080);
 }

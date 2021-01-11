@@ -1,5 +1,6 @@
 #pragma once
 
+#include <v60/meta.hpp>
 #include <v60/request.hpp>
 #include <v60/routing.hpp>
 
@@ -31,7 +32,7 @@ auto use(FnT&& m, N&& next) {
     return middleware<N, FnT>{std::forward<N>(next), std::forward<FnT>(m)};
 }
 
-auto json_body = []<Object Params, std::convertible_to<std::string_view> Body>(
+auto json_body = []<Object Params, meta::convertible_to<std::string_view> Body>(
                      request<Params, Body> req, Response auto resp, Routable auto& next) {
     return next(
         std::forward<decltype(req)>(req).with_body(nlohmann::json::parse(req.body)),
@@ -40,7 +41,7 @@ auto json_body = []<Object Params, std::convertible_to<std::string_view> Body>(
 
 template<Object ObjT>
 auto object_body =
-    []<Object Params, std::convertible_to<std::string_view> Body>(
+    []<Object Params, meta::convertible_to<std::string_view> Body>(
         request<Params, Body> req, Response auto resp, Routable auto& next) {
         auto json = nlohmann::json::parse(req.body);
 

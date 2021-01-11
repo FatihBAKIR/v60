@@ -5,7 +5,7 @@ auto user_router() {
     using namespace v60;
 
     auto name_handler = [](Request auto req, Response auto resp) -> task<void> {
-        co_await resp.send("hello " + std::string(req.params.get<"userId">()));
+        co_await resp.send("hello " + std::string(get<"userId">(req.params)));
     };
 
     auto age_handler = [](Request auto req, Response auto resp) -> task<void> {

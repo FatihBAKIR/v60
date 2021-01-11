@@ -47,12 +47,14 @@ struct object_impl<member<keys, Ts>...> {
         using common_keys =
             meta::intersection_t<member_list, other_member_list, member_less>;
         using common_obj_t = meta::instantiate_t<object, common_keys>;
-        common_obj_t::for_each_key([&]<auto key>() { get<key>() = rhs.get<key>(); });
+        common_obj_t::for_each_key([&]<auto key>() {
+            get<key>() = rhs.template get<key>();
+        });
 
         using extra_keys = meta::difference_t<all_keys, member_list, member_less>;
         using extra_obj_t = meta::instantiate_t<object, extra_keys>;
         extra_obj_t::for_each_key([&]<auto key>() {
-            m_dynamic.emplace(std::string_view(key), rhs.get<key>());
+            m_dynamic.emplace(std::string_view(key), rhs.template get<key>());
             std::cerr << "Key " << std::string_view(key)
                       << " does not belong to new object\n";
         });
@@ -74,17 +76,17 @@ struct object_impl<member<keys, Ts>...> {
 
     template<class T>
     static void for_each_key(T&& t) {
-        (t.operator()<keys>(), ...);
+        (t.template operator()<keys>(), ...);
     }
 
     template<class T>
     void for_each_member(T&& t) const {
-        (t.operator()<keys>(get<keys>()), ...);
+        (t.template operator()<keys>(get<keys>()), ...);
     }
 
     template<class T>
     void for_each_member(T&& t) {
-        (t.operator()<keys>(get<keys>()), ...);
+        (t.template operator()<keys>(get<keys>()), ...);
     }
 
 private:
@@ -114,4 +116,15 @@ static_assert(Object<object<member<"", int>>>);
 
 template<Object T, Object T2>
 using object_and = typename detail::object_and_impl<T, T2>::type;
+
+
+template<fixed_string Key, Object Obj>
+decltype(auto) get(Obj& obj) {
+    return obj.template get<Key>();
+}
+
+template<fixed_string Key, Object Obj>
+decltype(auto) get(const Obj& obj) {
+    return obj.template get<Key>();
+}
 } // namespace v60

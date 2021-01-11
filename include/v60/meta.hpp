@@ -354,4 +354,7 @@ template<class T>
 concept awaitable = requires(T t) {
     detail::do_await(t);
 };
+
+template<class From, class To>
+concept convertible_to = std::is_convertible_v<From, To>;
 } // namespace v60::meta

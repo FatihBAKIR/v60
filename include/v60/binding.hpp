@@ -30,7 +30,7 @@ public:
             return {};
         }
 
-        auto all_match = m.get<0>();
+        auto all_match = m.template get<0>();
 
         auto remain = path.substr(std::distance(path.begin(), all_match.end()));
 
@@ -43,7 +43,7 @@ public:
 
         assert(m);
 
-        auto all_match = m.get<0>();
+        auto all_match = m.template get<0>();
         auto len = std::distance(req.remaining().begin(), all_match.end());
         assert(m_next.match(req.method(), req.remaining().substr(len)));
 
@@ -51,7 +51,8 @@ public:
 
         CombinedParams params = std::move(req.params);
         ParamsObjectT::for_each_key([&]<auto key>() {
-            params.get<key>() = std::string_view(m.get_by_name<::meta::to_ct_str(key)>());
+            auto val = std::string_view(m.template get_by_name<::meta::to_ct_str(key)>());
+            params.template get<key>() = val;
         });
 
         req.consume(static_cast<int>(len));

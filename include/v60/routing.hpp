@@ -61,17 +61,14 @@ auto dummy_send = [](auto&&) -> task<void> {};
 
 template<class ParamT, class BodyT, class T>
 concept RoutableOf = requires(T t) {
-    {
-        static_cast<const T&>(t).match(std::declval<http::verb>(),
-                                       std::declval<std::string_view>())
-    }
-    ->std::convertible_to<bool>;
+    {static_cast<const T&>(t).match(std::declval<http::verb>(),
+                                    std::declval<std::string_view>())};
+    //->std::convertible_to<bool>;
 
     {
         static_cast<const T&>(t)(std::declval<request<ParamT, BodyT>&&>(),
                                  std::declval<response<decltype(detail::dummy_send)>&&>())
-    }
-    ->meta::awaitable;
+        } -> meta::awaitable;
 };
 
 template<class T>
