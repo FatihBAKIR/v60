@@ -52,11 +52,9 @@ constexpr auto path_pattern_to_regex() {
 
     return res;
 }
-
-auto dummy_send = [](auto&&) -> task<void> {};
 } // namespace detail
 
-template<class ParamT, class BodyT, class T>
+template<class T, class Req>
 concept RoutableOf = requires(T t) {
     {
         static_cast<const T&>(t).match(std::declval<http::verb>(),
@@ -65,14 +63,14 @@ concept RoutableOf = requires(T t) {
     ->meta::convertible_to<bool>;
 
     {
-        static_cast<const T&>(t)(std::declval<request<ParamT, BodyT>&&>(),
-                                 std::declval<response<decltype(detail::dummy_send)>&&>())
+        static_cast<const T&>(t)(std::declval<Req>(),
+                                 std::declval<any_response>())
     }
     ->meta::awaitable;
 };
 
 template<class T>
-concept Routable = RoutableOf<object<>, object<>, T>;
+concept Routable = RoutableOf<T, request<>>;
 
 namespace detail {
 template<Request Req, Response Resp>
@@ -82,7 +80,7 @@ struct virt_routable {
     virtual ~virt_routable() = default;
 };
 
-template<Routable Rt, Request Req, Response Resp>
+template<Request Req, Response Resp, RoutableOf<Req> Rt>
 struct erased_routable : virt_routable<Req, Resp> {
     erased_routable(Rt rt)
         : m_rt{std::move(rt)} {
@@ -102,9 +100,9 @@ struct erased_routable : virt_routable<Req, Resp> {
 
 template<Request Req, Response Resp>
 struct any_routable {
-    template<Routable Rt>
+    template<RoutableOf<Req> Rt>
     any_routable(Rt&& rt)
-        : m_rt{std::make_unique<detail::erased_routable<Rt, Req, Resp>>(
+        : m_rt{std::make_unique<detail::erased_routable<Req, Resp,Rt>>(
               std::forward<Rt>(rt))} {
     }
 
