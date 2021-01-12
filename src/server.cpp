@@ -97,15 +97,14 @@ struct server_impl {
 
                 co_await handle_request(std::move(req), lambda);
                 if (close) {
+                    // Send a TCP shutdown
+                    stream.socket().shutdown(tcp::socket::shutdown_send);
                     break;
                 }
             }
         } catch (std::exception& err) {
             std::cerr << err.what() << '\n';
         }
-
-        // Send a TCP shutdown
-        stream.socket().shutdown(tcp::socket::shutdown_send);
     }
 
     net::awaitable<void> do_listen(net::io_context& ioc, tcp::endpoint endpoint) {
