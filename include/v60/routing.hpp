@@ -43,10 +43,12 @@ constexpr auto path_pattern_to_regex() {
 
         res_it = std::copy_n("(?<", 3, res_it);
         res_it = std::copy(m.get<1>().begin(), m.get<1>().end(), res_it);
-        res_it = std::copy_n(">\\w+)", 5, res_it);
+        res_it = std::copy_n(">\\S+)", 5, res_it);
 
         beg += std::distance(m.get<0>().begin(), m.get<0>().end());
     }
+
+    std::copy(beg, pattern_sv.end(), res_it);
 
     return res;
 }

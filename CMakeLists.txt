@@ -8,6 +8,7 @@ option(V60_INSTALL "Enable installing v60" ON)
 option(V60_EXAMPLES "Enable building examples v60" ON)
 option(V60_NO_VENDOR "Disable vendored libraries" OFF)
 
+set(Boost_USE_STATIC_LIBS ON)
 set(BOOST_ROOT "C:\\local\\boost_1_75_0")
 find_package(Boost REQUIRED COMPONENTS system date_time)
 
@@ -35,6 +36,7 @@ add_library(v60
     src/server.cpp
     include/v60/v60.hpp
     src/end_point.cpp
+    src/simdjson.cpp
 )
 target_compile_features(v60 PUBLIC cxx_std_20)
 target_include_directories(v60 PUBLIC
@@ -58,7 +60,7 @@ if (WIN32)
     target_compile_definitions(v60 PUBLIC _WIN32_WINNT=0x0601)
 else()
     target_compile_options(v60 PUBLIC -stdlib=libc++)
-    target_link_options(v60 PUBLIC -stdlib=libc++ -fuse-ld=lld -static -lc++abi)
+    target_link_options(v60 PUBLIC -stdlib=libc++ -fuse-ld=lld -lc++abi)
 endif()
 
 if (V60_EXAMPLES)

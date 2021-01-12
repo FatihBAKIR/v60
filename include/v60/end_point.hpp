@@ -35,13 +35,23 @@ public:
     }
 };
 
+template <class FnT>
+auto get(FnT&& fn) {
+    return end_point<http::verb::get, FnT>{std::forward<FnT>(fn)};
+}
+
+template <class FnT>
+auto post(FnT&& fn) {
+    return end_point<http::verb::post, FnT>{std::forward<FnT>(fn)};
+}
+
 template<fixed_string Path, class FnT>
 auto get(FnT&& fn) {
-    return bind<Path, end_point<http::verb::get, FnT>>({std::forward<FnT>(fn)});
+    return bind<Path>(get(std::forward<FnT>(fn)));
 }
 
 template<fixed_string Path, class FnT>
 auto post(FnT&& fn) {
-    return bind<Path, end_point<http::verb::post, FnT>>({std::forward<FnT>(fn)});
+    return bind<Path>(post(std::forward<FnT>(fn)));
 }
 } // namespace v60
