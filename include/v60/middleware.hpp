@@ -1,6 +1,6 @@
 #pragma once
 
-#include <simdjson.h>
+#include <v60/internal/simdjson.h>
 #include <v60/meta.hpp>
 #include <v60/request.hpp>
 #include <v60/routing.hpp>

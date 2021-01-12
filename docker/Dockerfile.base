@@ -1,0 +1,28 @@
+FROM debian:10-slim
+
+RUN DEBIAN_FRONTEND=noninteractive \
+    apt-get update && \
+    apt-get install -y lsb-release wget software-properties-common git ninja-build gnupg
+
+RUN wget https://apt.llvm.org/llvm.sh
+RUN chmod +x llvm.sh
+RUN ./llvm.sh 12
+
+RUN apt-get install -y clang-12 lldb-12 lld-12 libc++-12-dev libc++abi-12-dev
+RUN ln -s $(which clang-12) /usr/bin/clang && \
+    ln -s $(which clang++-12) /usr/bin/clang++ && \
+    ln -s $(which lld-12) /usr/bin/lld
+
+RUN wget https://dl.bintray.com/boostorg/release/1.75.0/source/boost_1_75_0.tar.gz
+RUN tar xf boost_1_75_0.tar.gz
+
+WORKDIR boost_1_75_0
+RUN ./bootstrap.sh --with-toolset=clang
+RUN ./b2 cxxstd=20 toolset=clang cxxflags="-stdlib=libc++" linkflags="-stdlib=libc++ -fuse-ld=lld" link=static stage release
+RUN ./b2 install cxxstd=20 toolset=clang cxxflags="-stdlib=libc++" linkflags="-stdlib=libc++ -fuse-ld=lld" link=static
+
+RUN wget https://github.com/Kitware/CMake/releases/download/v3.19.2/cmake-3.19.2-Linux-x86_64.sh
+RUN chmod +x cmake-3.19.2-Linux-x86_64.sh
+RUN ./cmake-3.19.2-Linux-x86_64.sh --skip-license --prefix=/usr
+
+WORKDIR /

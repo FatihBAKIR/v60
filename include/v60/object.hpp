@@ -47,7 +47,7 @@ struct object_impl<member<keys, Ts>...> {
             meta::intersection_t<member_list, other_member_list, member_less>;
         using common_obj_t = meta::instantiate_t<object, common_keys>;
         common_obj_t::for_each_key([&]<auto key>() {
-            get<key>() = rhs.template get<key>();
+            set<key>(rhs.template get<key>());
         });
 
         using extra_keys = meta::difference_t<all_keys, member_list, member_less>;
@@ -71,6 +71,11 @@ struct object_impl<member<keys, Ts>...> {
         constexpr auto index = meta::index_of<key, keys...>();
         static_assert(index >= 0, "The given key is not a member name!");
         return std::get<index>(m_members);
+    }
+
+    template <fixed_string key, class T>
+    constexpr void set(T&& t) {
+        get<key>() = std::forward<T>(t);
     }
 
     template<class T>
@@ -120,5 +125,9 @@ decltype(auto) get(Obj& obj) {
 template<fixed_string Key, Object Obj>
 decltype(auto) get(const Obj& obj) {
     return obj.template get<Key>();
+}
+template<fixed_string Key, Object Obj, class T>
+void set(const Obj& obj, T&& t) {
+    return obj.template set<Key>(std::forward<T>(t));
 }
 } // namespace v60

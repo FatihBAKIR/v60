@@ -1,10 +1,10 @@
 #pragma once
 
 #include <algorithm>
-#include <ctre.hpp>
 #include <optional>
 #include <string_view>
 #include <v60/fixed_string.hpp>
+#include <v60/internal/ctre.hpp>
 #include <v60/meta.hpp>
 #include <v60/request.hpp>
 #include <v60/response.hpp>

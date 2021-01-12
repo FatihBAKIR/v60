@@ -1,9 +1,9 @@
 #pragma once
 
-#include <simdjson.h>
 #include <string_view>
 #include <v60/async.hpp>
 #include <v60/http.hpp>
+#include <v60/internal/simdjson.h>
 #include <v60/object.hpp>
 
 namespace v60 {

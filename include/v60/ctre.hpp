@@ -1,7 +1,7 @@
 #pragma once
 
-#include <ctre.hpp>
 #include <v60/fixed_string.hpp>
+#include <v60/internal/ctre.hpp>
 #include <v60/object.hpp>
 
 namespace meta {
