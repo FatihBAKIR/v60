@@ -23,7 +23,7 @@ void fail(beast::error_code ec, char const* what) {
 
 struct server_impl {
     any_routable<request<object<>, std::string_view>, any_response> m_route;
-    net::io_context m_ioc{std::thread::hardware_concurrency()};
+    net::io_context m_ioc{static_cast<int>(std::thread::hardware_concurrency())};
 
     server_impl(any_routable<request<object<>, std::string_view>, any_response> route)
         : m_route{std::move(route)} {
@@ -66,9 +66,9 @@ struct server_impl {
         v60::any_response resp(send, std::move(res));
         const auto route_res = co_await m_route(std::move(reqq), std::move(resp));
 
-        if (route_res) {
-            std::cerr << "200 [" << to_string(verb) << "] \"" << target << "\"\n";
-        }
+        //if (route_res) {
+        //    std::cerr << "200 [" << to_string(verb) << "] \"" << target << "\"\n";
+        //}
     }
 
     net::awaitable<void> do_session(beast::tcp_stream stream) {
