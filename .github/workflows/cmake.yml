@@ -23,8 +23,8 @@ jobs:
     - name: Add the nightly LLVM sources
       run: wget https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && sudo ./llvm.sh 12 && sudo apt-get install -y clang-12 lldb-12 lld-12 libc++-12-dev libc++abi-12-dev
     
-    - name: Setup symlinks
-      run: sudo ln -s $(which clang-12) /usr/bin/clang && sudo ln -s $(which clang++-12) /usr/bin/clang++ && sudo ln -s $(which lld-12) /usr/bin/lld
+    #- name: Setup symlinks
+    #  run: sudo ln -s $(which clang-12) /usr/bin/clang && sudo ln -s $(which clang++-12) /usr/bin/clang++ && sudo ln -s $(which lld-12) /usr/bin/lld
     
     - name: Install boost
       run: sudo apt-get install -y libboost-all-dev
