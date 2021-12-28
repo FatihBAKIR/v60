@@ -1,5 +1,6 @@
 #pragma once
 
+#include <boost/json.hpp>
 #include <string_view>
 #include <v60/async.hpp>
 #include <v60/http.hpp>
@@ -27,6 +28,11 @@ public:
     task<void> json(int64_t data) {
         content_type("application/json");
         return send(std::to_string(data));
+    }
+
+    task<void> json(const boost::json::value& data) {
+        content_type("application/json");
+        return send(serialize(data));
     }
 
     task<void> send(std::string data) {

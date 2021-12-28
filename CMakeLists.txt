@@ -8,8 +8,8 @@ option(V60_INSTALL "Enable installing v60" ON)
 option(V60_EXAMPLES "Enable building examples v60" ON)
 option(V60_NO_VENDOR "Disable vendored libraries" OFF)
 
-set(Boost_USE_STATIC_LIBS ON)
-set(BOOST_ROOT "C:\\local\\boost_1_75_0")
+#set(Boost_USE_STATIC_LIBS ON)
+#set(BOOST_ROOT "C:\\local\\boost_1_75_0")
 find_package(Boost REQUIRED COMPONENTS system date_time)
 
 add_library(v60
@@ -42,7 +42,7 @@ target_compile_features(v60 PUBLIC cxx_std_20)
 target_include_directories(v60 PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>)
-target_link_libraries(v60 PUBLIC Boost::boost Boost::system Boost::date_time)
+target_link_libraries(v60 PUBLIC Boost::boost Boost::system)
 target_link_directories(v60 PUBLIC ${Boost_LIBRARY_DIRS})
 
 if(${CMAKE_VERSION} VERSION_GREATER "3.16.0")
@@ -59,8 +59,9 @@ target_link_libraries(v60 PUBLIC Threads::Threads)
 if (WIN32)
     target_compile_definitions(v60 PUBLIC _WIN32_WINNT=0x0601)
 else()
-    target_compile_options(v60 PUBLIC -stdlib=libc++)
-    target_link_options(v60 PUBLIC -stdlib=libc++ -fuse-ld=lld -lc++abi)
+    #target_compile_options(v60 PUBLIC -stdlib=libc++)
+    #target_link_options(v60 PUBLIC -stdlib=libc++ -lc++abi)
+    #target_link_options(v60 PUBLIC -fuse-ld=lld)
 endif()
 
 if (V60_EXAMPLES)

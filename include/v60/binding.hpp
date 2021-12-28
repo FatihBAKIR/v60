@@ -27,14 +27,16 @@ public:
         auto m = RE::starts_with(path);
 
         if (!m) {
-            return {};
+            return false;
         }
 
         auto all_match = m.template get<0>();
 
-        auto remain = path.substr(std::distance(path.begin(), all_match.end()));
+        auto dist = std::distance(path.begin(), all_match.end());
+        auto remain = path.substr(dist);
 
-        return m_next.match(v, remain);
+        auto res = m_next.match(v, remain);
+        return res;
     }
 
     template<Request Req, Response Resp>

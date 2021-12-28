@@ -37,15 +37,15 @@ constexpr auto path_pattern_to_regex() {
     auto beg = pattern_sv.begin();
     int off = 0;
     for (auto& m : sres) {
-        auto len = std::distance(beg, m.get<0>().begin());
+        auto len = std::distance(beg, m.template get<0>().begin());
         res_it = std::copy_n(beg, len, res_it);
         beg += len;
 
         res_it = std::copy_n("(?<", 3, res_it);
-        res_it = std::copy(m.get<1>().begin(), m.get<1>().end(), res_it);
+        res_it = std::copy(m.template get<1>().begin(), m.template get<1>().end(), res_it);
         res_it = std::copy_n(">\\S+)", 5, res_it);
 
-        beg += std::distance(m.get<0>().begin(), m.get<0>().end());
+        beg += std::distance(m.template get<0>().begin(), m.template get<0>().end());
     }
 
     std::copy(beg, pattern_sv.end(), res_it);

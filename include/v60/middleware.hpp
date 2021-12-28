@@ -49,7 +49,13 @@ auto object_body = [](Request auto req, Response auto resp, Routable auto& next)
 };
 
 
-auto profile_mw =
+inline constexpr auto logging_mw =
+    [](Request auto req, Response auto resp, Routable auto& next) -> task<bool> {
+    std::cerr << req.method() << " \"" << req.path() << "\"\n";
+    return next(std::move(req), std::move(resp));
+};
+
+inline constexpr auto profile_mw =
     [](Request auto req, Response auto resp, Routable auto& next) -> task<bool> {
     auto begin = std::chrono::high_resolution_clock::now();
     auto res = co_await next(std::move(req), std::move(resp));
@@ -62,7 +68,7 @@ auto profile_mw =
     co_return res;
 };
 
-auto not_found_mw =
+inline constexpr auto not_found_mw =
     [](Request auto req, Response auto resp, Routable auto& next) -> task<bool> {
     const auto is_matched = next.match(req.method(), req.path());
     if (!is_matched) {
@@ -75,7 +81,7 @@ auto not_found_mw =
     co_return co_await next(std::move(req), std::move(resp));
 };
 
-auto server_fault_mw =
+inline constexpr auto server_fault_mw =
     [](Request auto req, Response auto resp, Routable auto& next) -> task<bool> {
     auto method = req.method();
     auto path = req.path();
@@ -116,7 +122,6 @@ struct cookie_mixin {
 template<Object Cookies>
 auto cookie_parser =
     [](Request auto req, Response auto resp, Routable auto& next) -> task<bool> {
-
     auto cookies_header = req.header("Cookie");
     if (!cookies_header) {
         co_return false;
@@ -128,8 +133,7 @@ auto cookie_parser =
 
     std::map<std::string_view, std::string_view> kv;
     for (auto part : parts) {
-        if (auto [whole, key, val] = ctre::match<"(\\S+)=(\\S+)">(part);
-            whole) {
+        if (auto [whole, key, val] = ctre::match<"(\\S+)=(\\S+)">(part); whole) {
             kv.emplace(std::string_view(key), std::string_view(val));
         }
     }

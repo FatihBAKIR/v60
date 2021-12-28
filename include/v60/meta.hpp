@@ -347,7 +347,7 @@ template<class... Ts, template<class...> class U>
 struct is_instance<U<Ts...>, U> : public std::true_type {};
 
 namespace detail {
-auto do_await = [](auto& prom) -> v60::task<void> { co_await prom; };
+inline auto do_await = [](auto& prom) -> v60::task<void> { co_await prom; };
 }
 
 template<class T>
